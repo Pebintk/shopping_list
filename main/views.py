@@ -15,7 +15,7 @@ def show_main(request):
     products = Product.objects.filter(user=request.user)
     
     context = {
-        'name' : 'Muhammad Pendar Bintang Kasdiono',
+        'name' : request.user.username,
         'class' : 'PBP E',
         'products': products,
         'last_login': request.COOKIES['last_login'],
@@ -83,4 +83,26 @@ def logout_user(request):
     response = HttpResponseRedirect(reverse("main:show_main"))
     response.delete_cookie('last_login')
     return redirect('main:login')
+
+def edit_product(request, id):
+    # Get product berdasarkan ID
+    product = Product.objects.get(pk = id)
+
+    # Set product sebagai instance dari form
+    form = ProductForm(request.POST or None, instance=product)
+
+    if form.is_valid() and request.method == "POST":
+        # Simpan form dan kembali ke halaman awal
+        form.save()
+        return HttpResponseRedirect(reverse('main:show_main'))
+
+    context = {'form': form}
+    return render(request, "edit_product.html", context)
     
+def delete_product(request, id):
+    # Get data berdasarkan ID
+    product = Product.objects.get(pk = id)
+    # Hapus data
+    product.delete()
+    # Kembali ke halaman awal
+    return HttpResponseRedirect(reverse('main:show_main'))
